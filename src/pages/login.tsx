@@ -270,7 +270,7 @@ const LoginForm = () => {
                         <br></br>
 
                         <AppleLogin
-                          clientId="com.myysports.app.dev"
+                          clientId="app.netlify.29ecf7-melomakarona-keen"
                           redirectURI="https://keen-melomakarona-29ecf7.netlify.app/auth/apple"
                           usePopup={true}
                           callback={appleResponse} // Catch the response
