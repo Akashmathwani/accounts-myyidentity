@@ -9,10 +9,12 @@ import { useToasts } from "react-toast-notifications";
 import jwt_decode from "jwt-decode";
 import { redirect } from "next/dist/server/api-utils";
 
-export const AppleLogin = () => {
+const AppleLogin = () => {
   return (
     <div>
       <h1>Apple Login</h1>
     </div>
   );
 };
+
+export default AppleLogin;
