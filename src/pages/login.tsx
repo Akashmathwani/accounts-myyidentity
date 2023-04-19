@@ -14,6 +14,7 @@ import { useVisitorData } from "@fingerprintjs/fingerprintjs-pro-react";
 import FingerprintJS from "@fingerprintjs/fingerprintjs";
 import AppleLogin from "react-apple-login";
 import { getAppleData } from "@/api/apple";
+import { appleLogin } from "@/api/apple-login";
 
 //later in the code
 
@@ -190,11 +191,56 @@ const LoginForm = () => {
 
   console.log({ location });
 
-  const appleResponse = (response: any) => {
-    if (!response.error) {
-      getAppleData(response);
+  const appleResponse = async (response: any) => {
+    // if (!response.error) {
+    //   getAppleData(response);
+    // }
+    console.log({ id_token: response?.authorization?.id_token });
+    const id_token = response?.authorization?.id_token;
+    if (id_token) {
+      const decoded = jwt_decode(id_token) as any;
+      console.log({ response, decoded });
+
+      if (decoded) {
+        const email = decoded?.email as string;
+        const name = decoded?.name;
+        console.log();
+        if (id_token && email) {
+          const accountStorage = getAccountStorage();
+          const currentUserSession = accountStorage[email];
+
+          console.log({ response, currentUserSession });
+
+          if (
+            currentUserSession?.expires_at &&
+            currentUserSession.expires_at >
+              Math.floor(new Date().getTime() / 1000)
+          ) {
+            console.log("already logged in");
+            addToast("already logged in!", { appearance: "error" });
+          } else {
+            const loginData: LoginData = await appleLogin(id_token);
+            if (loginData) {
+              setAccountSession(email, loginData.session, "apple");
+              addToast(`Sucess Apple Sign in as ${name} and ${email}`, {
+                appearance: "success",
+              });
+            }
+            if (query?.redirect_back) {
+              const newQuery = query;
+              delete newQuery["redirect_back"];
+              router.push(
+                `/authorize?${new URLSearchParams(newQuery).toString()}`
+              );
+            } else {
+              router.push("accounts");
+            }
+          }
+        }
+      }
+    } else {
+      addToast("Some problem with Apple login", { appearance: "error" });
     }
-    console.log({ response });
   };
 
   return (
