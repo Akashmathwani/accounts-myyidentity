@@ -1,7 +1,5 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { LoginForm } from "../components";
-import SignUpForm from "./home";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { ACCOUNTS_STORAGE } from "@/config/localstorage";

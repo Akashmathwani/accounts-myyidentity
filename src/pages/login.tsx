@@ -25,7 +25,7 @@ const LoginForm = () => {
   const { addToast } = useToasts();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState("");
-  const [location, setLocation] = useState(null);
+  const [location, setLocation] = useState({});
   const [fpHash, setFpHash] = React.useState("");
 
   const {
@@ -140,7 +140,7 @@ const LoginForm = () => {
     }
   };
 
-  const handleGoolgleLoginFailure = async (response) => {
+  const handleGoolgleLoginFailure = async (response: any) => {
     console.log({ response });
     addToast("Login Failed with google", { appearance: "error" });
   };
@@ -189,7 +189,7 @@ const LoginForm = () => {
 
   console.log({ location });
 
-  const appleResponse = (response) => {
+  const appleResponse = (response: any) => {
     if (!response.error) {
     }
     console.log({ response });
@@ -262,7 +262,7 @@ const LoginForm = () => {
 
                         <GoogleLogin
                           onSuccess={handleGoolgleLoginSuccess}
-                          onError={handleGoolgleLoginFailure}
+                          onError={() => handleGoolgleLoginFailure}
                         />
 
                         <br></br>

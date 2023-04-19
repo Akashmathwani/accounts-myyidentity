@@ -1,6 +1,5 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import SignUpForm from "./home";
 
 const Home: NextPage = () => {
   return (
@@ -11,10 +10,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>
-        {/* <h1 className="text-xl font-bold">Home</h1> */}
-        <SignUpForm />
-      </main>
+      <main>{/* <h1 className="text-xl font-bold">Home</h1> */}</main>
     </div>
   );
 };
