@@ -13,6 +13,7 @@ import { redirect } from "next/dist/server/api-utils";
 import { useVisitorData } from "@fingerprintjs/fingerprintjs-pro-react";
 import FingerprintJS from "@fingerprintjs/fingerprintjs";
 import AppleLogin from "react-apple-login";
+import { getAppleData } from "@/api/apple";
 
 //later in the code
 
@@ -191,6 +192,7 @@ const LoginForm = () => {
 
   const appleResponse = (response: any) => {
     if (!response.error) {
+      getAppleData(response);
     }
     console.log({ response });
   };
@@ -269,7 +271,7 @@ const LoginForm = () => {
 
                         <AppleLogin
                           clientId="com.myysports.app.dev"
-                          redirectURI="YOUR_REDIRECT_URL"
+                          redirectURI="https://keen-melomakarona-29ecf7.netlify.app/auth/apple"
                           usePopup={true}
                           callback={appleResponse} // Catch the response
                           scope="email name"
