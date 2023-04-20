@@ -1,4 +1,4 @@
-export const STAMP_API_BASE_URL = "http://localhost:5004";
+export const STAMP_API_BASE_URL = "https://oauth2.highfives.in";
 // export const AUTHENTICATION_BASE_URL = "http://localhost:4002";
 // export const AUTHENTICATION_BASE_URL =
 //   "https://ea78-2405-201-5c09-6011-613f-4f0c-14b0-3631.ngrok-free.app";
