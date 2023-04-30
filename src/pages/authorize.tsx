@@ -30,7 +30,7 @@ const AuthorizePage: NextPage = () => {
 
     const accounts = getAccountStorage();
     const accountsActive: any = {};
-    const newAccountData: SessionDataMap[] = [];
+    const activeAccountData: SessionDataMap[] = [];
 
     if (Object.keys(accounts).length) {
       Object.keys(accounts).forEach((email) => {
@@ -40,7 +40,7 @@ const AuthorizePage: NextPage = () => {
           delete accounts[email];
         } else {
           accountsActive[email] = accounts[email];
-          newAccountData.push({
+          activeAccountData.push({
             email,
             data: accounts[email],
           });
@@ -63,7 +63,7 @@ const AuthorizePage: NextPage = () => {
         console.log("no accounts found");
         return;
       } else {
-        setAccounts(newAccountData);
+        setAccounts(activeAccountData);
       }
     } else {
       router.push(
