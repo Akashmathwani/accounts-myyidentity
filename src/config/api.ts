@@ -5,7 +5,7 @@ export const STAMP_API_BASE_URL = "http://dev-oauth.athena.myysports.com";
 // export const AUTHENTICATION_BASE_URL =
 //   "https://fefb-123-201-214-73.ngrok-free.app";
 export const AUTHENTICATION_BASE_URL =
-  "http://dev-notification.athena.myysports.com";
+  "http://dev-authentication.athena.myysports.com";
 export const GOOGLE_CLIENT_ID =
   "729824482770-r2d7r3919pbrc3hl9sg6o7qo8k8bvsed.apps.googleusercontent.com";
 

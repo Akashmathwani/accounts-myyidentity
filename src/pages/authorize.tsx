@@ -1,13 +1,12 @@
-import type { NextPage } from "next";
+import type {NextPage} from "next";
 import Head from "next/head";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { oauthAuthorize } from "@/api/authorize";
-import { SessionDataMap } from "@/types";
-import { ACCOUNTS_STORAGE } from "@/config/localstorage";
+import {useRouter} from "next/router";
+import {useEffect, useState} from "react";
+import {oauthAuthorize} from "@/api/authorize";
+import {SessionDataMap} from "@/types";
+import {ACCOUNTS_STORAGE} from "@/config/localstorage";
 
 const AuthorizePage: NextPage = () => {
-  const [emails, setEmails] = useState<string[]>([]);
   const [accounts, setAccounts] = useState<SessionDataMap[]>([]);
   const router = useRouter();
   const query: any = router.query;
@@ -17,7 +16,7 @@ const AuthorizePage: NextPage = () => {
     return accountStorage ? JSON.parse(accountStorage) : {};
   };
 
-  const fetchAccounts = () => {
+  const syncAccounts = () => {
     if (
       !query.client_id ||
       !query.redirect_uri ||
@@ -28,12 +27,44 @@ const AuthorizePage: NextPage = () => {
       console.log("invalid query");
       return;
     }
+
     const accounts = getAccountStorage();
+    const accountsActive: any = {};
+    const newAccountData: SessionDataMap[] = [];
 
-    const allEmails = Object.keys(accounts);
+    if (Object.keys(accounts).length) {
+      Object.keys(accounts).forEach((email) => {
+        if (
+          accounts[email].expires_at < Math.floor(new Date().getTime() / 1000)
+        ) {
+          delete accounts[email];
+        } else {
+          accountsActive[email] = accounts[email];
+          newAccountData.push({
+            email,
+            data: accounts[email],
+          });
+        }
+      });
+      console.log("accountsActive", accountsActive);
 
-    if (allEmails?.length) {
-      setEmails(allEmails);
+      window.localStorage.setItem(
+        ACCOUNTS_STORAGE,
+        JSON.stringify(accountsActive)
+      );
+      console.log(
+        Object.keys(accountsActive).length,
+        "Object.keys(accountsActive).length"
+      );
+      if (Object.keys(accountsActive).length === 0) {
+        router.push(
+          `/login?redirect_back=true&${new URLSearchParams(query).toString()}`
+        );
+        console.log("no accounts found");
+        return;
+      } else {
+        setAccounts(newAccountData);
+      }
     } else {
       router.push(
         `/login?redirect_back=true&${new URLSearchParams(query).toString()}`
@@ -41,17 +72,43 @@ const AuthorizePage: NextPage = () => {
       console.log("no accounts found");
       return;
     }
-
-    if (Object.keys(accounts).length) {
-      const accountData = Object.keys(accounts).map((email) => {
-        return {
-          email,
-          data: accounts[email],
-        };
-      });
-      setAccounts(accountData);
-    }
   };
+
+  // const fetchAccounts = () => {
+  //   if (
+  //     !query.client_id ||
+  //     !query.redirect_uri ||
+  //     !query.grant_type ||
+  //     !query.response_type
+  //   ) {
+  //     router.push("/error");
+  //     console.log("invalid query");
+  //     return;
+  //   }
+  //   const accounts = getAccountStorage();
+
+  //   const allEmails = Object.keys(accounts);
+
+  //   if (allEmails?.length) {
+  //     setEmails(allEmails);
+  //   } else {
+  //     router.push(
+  //       `/login?redirect_back=true&${new URLSearchParams(query).toString()}`
+  //     );
+  //     console.log("no accounts found");
+  //     return;
+  //   }
+
+  //   if (Object.keys(accounts).length) {
+  //     const accountData = Object.keys(accounts).map((email) => {
+  //       return {
+  //         email,
+  //         data: accounts[email],
+  //       };
+  //     });
+  //     setAccounts(accountData);
+  //   }
+  // };
 
   const handleAuthorize = async (email: string) => {
     const sessionData = accounts.find((account) => account.email === email);
@@ -62,7 +119,7 @@ const AuthorizePage: NextPage = () => {
         new URLSearchParams(query).toString(),
         sessionToken
       );
-      console.log({ resData });
+      console.log({resData});
       window.location.href = `${resData.redirect_uri}?code=${resData.code}&state=${resData.state}`;
     } else {
       console.log(" session expired or not present");
@@ -77,7 +134,7 @@ const AuthorizePage: NextPage = () => {
   useEffect(() => {
     if (!router.isReady) return;
 
-    fetchAccounts();
+    syncAccounts();
   }, [router.isReady]);
 
   if (!router.isReady) return <></>;

@@ -1,21 +1,15 @@
-import type { NextPage } from "next";
+import type {NextPage} from "next";
 import Head from "next/head";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { ACCOUNTS_STORAGE } from "@/config/localstorage";
-import { SessionDataMap, SessionData } from "@/types";
-import { authLogout } from "@/api/logout";
-import { useToasts } from "react-toast-notifications";
-
-//unix to local date with date and time
-// const unixToLocalDate = (unix: number) => {
-//   const date = new Date(unix * 1000);
-//   return date.toLocaleString();
-// };
+import {useRouter} from "next/router";
+import {useEffect, useState} from "react";
+import {ACCOUNTS_STORAGE} from "@/config/localstorage";
+import {SessionDataMap, SessionData} from "@/types";
+import {authLogout} from "@/api/logout";
+import {useToasts} from "react-toast-notifications";
 
 const AuthorizePage: NextPage = () => {
   const [accounts, setAccounts] = useState<SessionDataMap[]>([]);
-  const { addToast } = useToasts();
+  const {addToast} = useToasts();
   const router = useRouter();
 
   const getAccountStorage = () => {
@@ -23,16 +17,34 @@ const AuthorizePage: NextPage = () => {
     return accountStorage ? JSON.parse(accountStorage) : {};
   };
 
-  const fetchAccounts = () => {
+  const syncAccounts = () => {
     const accounts = getAccountStorage();
+    const accountsActive: any = {};
+    const newAccountData: SessionDataMap[] = [];
     if (Object.keys(accounts).length) {
-      const accountData = Object.keys(accounts).map((email) => {
-        return {
-          email,
-          data: accounts[email],
-        };
+      Object.keys(accounts).forEach((email) => {
+        if (
+          accounts[email].expires_at < Math.floor(new Date().getTime() / 1000)
+        ) {
+          delete accounts[email];
+        } else {
+          accountsActive[email] = accounts[email];
+          newAccountData.push({
+            email,
+            data: accounts[email],
+          });
+        }
       });
-      setAccounts(accountData);
+      window.localStorage.setItem(
+        ACCOUNTS_STORAGE,
+        JSON.stringify(accountsActive)
+      );
+      if (Object.keys(accountsActive).length === 0) {
+        router.push(`/login`);
+        console.log("no accounts found");
+        return;
+      }
+      setAccounts(newAccountData);
     }
   };
 
@@ -46,16 +58,16 @@ const AuthorizePage: NextPage = () => {
     const token = sessionData.token;
     const res = await authLogout(token);
     if (!res) {
-      addToast("problem logging out with API", { appearance: "error" });
+      addToast("problem logging out with API", {appearance: "error"});
     }
     delete accounts[email];
     window.localStorage.setItem(ACCOUNTS_STORAGE, JSON.stringify(accounts));
-    fetchAccounts();
+    syncAccounts();
     router.reload();
   };
 
   useEffect(() => {
-    fetchAccounts();
+    syncAccounts();
   }, []);
 
   return (
